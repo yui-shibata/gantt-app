@@ -6,7 +6,6 @@ import HC_exporting from 'highcharts/modules/exporting';
 import HC_accessibility from 'highcharts/modules/accessibility';
 import more from "highcharts/highcharts-more";
 import draggable from "highcharts/modules/draggable-points";
-import {schedule_item} from './schedule_item';
 
 HighchartsGantt(Highcharts);
 HC_exporting(Highcharts);
@@ -20,236 +19,77 @@ const WeeklyGantt = ({plan}) => {
 
   // Process data and initialize chart on component mount
   useEffect(() => {
-    var series,
-    products;
-
-    // Set to 00:00:00:000 today
-    products = [plan];
-    // Your existing data processing code here...
-    series = products.map(function (product, i) {
-      var data = product.deals.map(function (deal) {
-        return {
-          id: 'deal-' + i,
-          product: deal.product,
-          start: deal.from,
-          end: deal.to,
-          y: i,
-          name: deal.product
-        };
-      });
-      return {
-        name: product.plant,
-        data: data,
-        current: product.deals[product.current]
-      };
-    });
-
-    // Set chart options
+    var series = [{
+      name:'L1工場',
+      data: plan
+    }
+  ];
     const options = {
       series: series,
-      // ...Other chart options...
       plotOptions: {
         series: {
           dataLabels: {
             enabled: true,
-            format: '{point.name}',
+            format: '{point.name}<br>{point.production_volume}',
             style: {
               fontWeight: 'normal'
             }
           },
           dragDrop: {
             draggableX: true,
-            draggableY: true,
-            dragMinY: 0,
-            dragMaxY: 6,
-            dragMinX: 0,
-            dragMaxX: 6,
-            liveRedraw: false,
-            groupBy: 'groupId' 
+            dragMinX: 60 * 1000, // ドラッグ操作の最小値を1分に設定
+          },
+          point: {
+            events: {
+              drag: function (e) {
+                // ドラッグされた時の処理
+                // e.targetはドラッグされたポイントを表します
+                // e.newXには新しいX座標（エポック時間）が含まれています
+                console.log('Dragged point:', e.target);
+                console.log('New X:', e.newX);
+              },
+            },
           },
         },
-        point: {
-          events: {
-            dragStart: function (e) {
-              yStart = e.chartY;
-              xStart = e.chartX;
-              seriesGroup = this.groupId;
-              seriesName = this.name;
-              seriesIndex = this.index;
-              seriesData = this.series.chart.series[0].data;
-  
-              blockGroup = blockProps.find(function (element) {
-                if (element[0] == seriesGroup) {
-                  return element;
-                }
-              });
-  
-              if (seriesName.indexOf("h") != -1) {
-                orientation = "horizontal";
-              } else {
-                orientation = "vertical";
-              }
-  
-              blocksIndex = blockProps.findIndex(function (element) {
-                if (element[0] == seriesGroup) {
-                  return element;
-                }
-              });
-  
-              startRow = blockGroup[1]; //row 2
-              startCol = blockGroup[2]; //column 0
-              size = blockGroup[3]; //length or height
-              seriesData = this.series.chart.series[0].data;
-            },
-            drag: function (e) {
-              try {
-                if (orientation == "horizontal") {
-                  let newerY = seriesData[seriesIndex].y;
-                  if (e.chartX > xStart) {
-                    //console.log('going right');
-  
-                    //red block's escape
-                    if (
-                      seriesGroup == "hBlock5" &&
-                      seriesData[seriesIndex].x2 > 5
-                    ) {
-                      seriesData[seriesIndex].update({ x: 6, x2: 7, y: newerY });
-                    }
-                    if (pointMatrix[startRow][startCol + size] == 0) {
-                      seriesData[seriesIndex].update({
-                        x: zones[startCol + 1][0],
-                        x2: zones[startCol + size][1],
-                        y: newerY,
-                      });
-  
-                      pointMatrix[startRow][startCol + size] = 1;
-                      pointMatrix[startRow][startCol] = 0;
-                      blockProps[blocksIndex][2] = startCol + 1;
-                    }
-                  } else {
-                    // console.log('going left');
-                    newerY = seriesData[seriesIndex].y;
-                    newX1 = zones[startCol - 1][0];
-                    newX2 = zones[startCol - 1 + (size - 1)];
-  
-                    gridindex1 = startCol - 1;
-                    gridindex2 = startCol + (size - 1);
-  
-                    if (pointMatrix[startRow][startCol - 1] == 0) {
-                      seriesData[seriesIndex].update({
-                        x: zones[startCol - 1][0],
-                        x2: zones[startCol - 1 + (size - 1)][1],
-                        y: newerY,
-                      });
-  
-                      pointMatrix[startRow][startCol - 1] = 1;
-                      pointMatrix[startRow][startCol + (size - 1)] = 0;
-                      blockProps[blocksIndex][2] = startCol - 1;
-                    }
-                  }
-                } else {
-                  if (e.chartY > yStart) {
-                    //  console.log('going down');
-  
-                    if (pointMatrix[startRow + size][startCol] == 0) {
-                      for (ii = 0; ii < seriesData.length; ++ii) {
-                        if (seriesData[ii].groupId == seriesGroup) {
-                          newerY = seriesData[ii].y + 1;
-                          seriesData[ii].update(newerY);
-                        }
-                      }
-                      pointMatrix[startRow + size][startCol] = 1;
-                      pointMatrix[startRow][startCol] = 0;
-                      blockProps[blocksIndex][1] = startRow + 1;
-                    }
-                  } else {
-                    // console.log('going up');
-  
-                    if (pointMatrix[startRow - 1][startCol] == 0) {
-                      for (ii = 0; ii < seriesData.length; ++ii) {
-                        if (seriesData[ii].groupId == seriesGroup) {
-                          newerY = seriesData[ii].y - 1;
-                          seriesData[ii].update(newerY);
-                        }
-                      }
-                      pointMatrix[startRow - 1 + size][startCol] = 0;
-                      pointMatrix[startRow - 1][startCol] = 1;
-                      blockProps[blocksIndex][1] = startRow - 1;
-                    }
-                  }
-                }
-              } catch (error) {
-                return;
-              }
-            },
-  
-            drop: function () {
-              return false;
-            },
+      },
+      exporting: {
+        buttons: {
+          contextButton: {
+            enabled: false // PDFエクスポートボタンを無効にする
           }
         }
       },
-      tooltip: {
-        pointFormat: '<span>Product: {point.product}</span><br/><span>From: {point.start:%e. %b}</span><br/><span>To: {point.end:%e. %b}</span>'
-      },
-      lang: {
-        accessibility: {
-          axis: {
-            xAxisDescriptionPlural: 'The chart has a two-part X axis showing time in both week numbers and days.',
-            yAxisDescriptionSingular: 'The chart has a tabular Y axis showing a data table row for each point.'
-          }
-        }
-      },
-      accessibility: {
-        keyboardNavigation: {
-          seriesNavigation: {
-            mode: 'serialize'
-          }
-        },
-        point: {
-          valueDescriptionFormat: 'Rented to {point.product} from {point.x:%A, %B %e} to {point.x2:%A, %B %e}.'
-        },
-        series: {
-          descriptionFormat: '{series.name}, product {add series.index 1} of {series.chart.series.length}.'
-        }
-      },
-      xAxis: {
+      xAxis: [{
         type: 'datetime',
-        tickInterval: 6 * 3600 * 1000, // 4時間単位
-        min: Date.UTC(2023, 4, 29,0,0,0), // 開始日
-        max: Date.UTC(2023, 5, 4,0,0,0), // 終了日
-        // max: Date.UTC(2023, 5, 4),
+        tickInterval: 6 * 3600 * 1000, // 6時間単位
+        startOnTick: false,
         labels: {
           formatter: function() {
-            return Highcharts.dateFormat('%H', this.value);
+            var shiftedValue = this.value + (8 * 3600 * 1000);
+            return Highcharts.dateFormat('%H', shiftedValue);
           }
+        },
+        grid: {
+          cellHeight: 30
         }
       },
-      yAxis: {
-        type: 'category',
+      {
+        type: 'datetime',
+        tickInterval: 24 * 3600 * 1000, // 1日単位
+        labels: {
+          formatter: function() {
+            return Highcharts.dateFormat('%Y/%m/%d', this.value);
+          }
+        },
         grid: {
-          columns: [{
-              title: {
-                  text: '工場'
-              },
-              categories: ["L1"]
-          }, {
-              title: {
-                  text: '週'
-              },
-              categories: ["第1週"]
-          }, {
-              title: {
-                  text: 'From'
-              },
-              categories: ["5/29((月)"]
-          }, {
-              title: {
-                  text: 'To'
-              },
-              categories: ["6/4(金)"]
-          }]
+          cellHeight: 30
         }
+      }],
+      yAxis: {
+        categories: ['L1工場'], // y軸のカテゴリを設定
+        title: {
+          text: null
+        },
       },
       credits:{  
         enabled: false,  
@@ -262,7 +102,7 @@ const WeeklyGantt = ({plan}) => {
   return (
     chartOptions && (
       <>
-      <div className="scrolling-container">
+      <div className="weekly-gantt-container">
         <HighchartsReact
           highcharts={Highcharts}
           constructorType={'ganttChart'}

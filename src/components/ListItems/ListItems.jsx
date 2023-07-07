@@ -29,10 +29,7 @@ const ListItems = () => {
       <Collapse in={open['menu1']} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
           <ListItemButton to={`/`}>
-            <ListItemText primary="複数月ガントチャート" />
-          </ListItemButton>
-          <ListItemButton to={`/week_gantt`}>
-            <ListItemText primary="単月ガントチャート" />
+            <ListItemText primary="ガントチャート" />
           </ListItemButton>
         </List>
       </Collapse>
@@ -58,29 +55,3 @@ const ListItems = () => {
 }
 
 export default ListItems;
-
-// export const secondaryListItems = (
-//   <React.Fragment>
-//     <ListSubheader component="div" inset>
-//       Saved reports
-//     </ListSubheader>
-//     <ListItemButton>
-//       <ListItemIcon>
-//         <AssignmentIcon />
-//       </ListItemIcon>
-//       <ListItemText primary="Current month" />
-//     </ListItemButton>
-//     <ListItemButton>
-//       <ListItemIcon>
-//         <AssignmentIcon />
-//       </ListItemIcon>
-//       <ListItemText primary="Last quarter" />
-//     </ListItemButton>
-//     <ListItemButton>
-//       <ListItemIcon>
-//         <AssignmentIcon />
-//       </ListItemIcon>
-//       <ListItemText primary="Year-end sale" />
-//     </ListItemButton>
-//   </React.Fragment>
-// );
