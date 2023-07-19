@@ -18,16 +18,16 @@ const calculateDuration = (start, end) => {
 
 export const schedule_item = [
   {
-    id:'deal-1',
+    // id:'deal-1',
     start:getTime('2023/9/29  8:00:00'),
     end:getTime('2023/10/5  13:20:00'),
     production_volume:calculateDuration('2023/9/29  8:00:00','2023/10/5  13:20:00'),
     name:'保全2',
     y: 1,
-    color:'#ff6600'
+    color:'#c0c6c9'
   },
   {
-    id:'deal-2',
+    // id:'deal-2',
     start:getTime('2023/10/5  13:20:00'),
     end:getTime('2023/10/6  14:20:00'),
     production_volume:calculateDuration('2023/10/5  13:20:00','2023/10/6  14:20:00'),
@@ -36,7 +36,7 @@ export const schedule_item = [
     color:'#ffcc33'
   },
   {
-    id:'deal-3',
+    // id:'deal-3',
     start:getTime('2023/10/6  14:20:00'),
     end:getTime('2023/10/14  21:20:00'),
     name:'KC8UAW 1330(L3)',
@@ -45,7 +45,7 @@ export const schedule_item = [
     color:'#33cc00'
   },
   {
-    id:'deal-4',
+    // id:'deal-4',
     start:getTime('2023/10/14  21:20:00'),
     end:getTime('2023/10/15  5:20:00'),
     name:'切り替え',
@@ -54,7 +54,7 @@ export const schedule_item = [
     color:'#008899'
   },
   {
-    id:'deal-5',
+    // id:'deal-5',
     start:getTime('2023/10/15  5:20:00'),
     end:getTime('2023/10/31  8:00:00'),
     name:'KC4UAW 1330(L3)',
