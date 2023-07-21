@@ -1,21 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import Highcharts from 'highcharts/highstock';
+import React, { useRef, useState ,useEffect} from 'react';
+import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import HighchartsGantt from "highcharts/modules/gantt";
-import HC_exporting from 'highcharts/modules/exporting';
-import HC_accessibility from 'highcharts/modules/accessibility';
-import more from "highcharts/highcharts-more";
-import draggable from "highcharts/modules/draggable-points";
+import HighchartsGantt from 'highcharts/modules/gantt';
+import { useDrag, DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 HighchartsGantt(Highcharts);
-HC_exporting(Highcharts);
-HC_accessibility(Highcharts);
-more(Highcharts);
-draggable(Highcharts);
 
 const WeeklyGantt = ({tasks, plan, initialMin, initialMax, dispatch}) => {
   const [chartOptions, setChartOptions] = useState()
+  const chartRef = useRef(null);
 
+  const [{ isDragging }, drag] = useDrag({
+    type: 'taskbar',
+    item: plan,
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+  });
+  
   // Process data and initialize chart on component mount
   useEffect(() => {
     var series = [{
@@ -34,13 +37,15 @@ const WeeklyGantt = ({tasks, plan, initialMin, initialMax, dispatch}) => {
               fontWeight: 'normal'
             }
           },
-          dragDrop: {
-            draggableX: true,
-            dragMinX: 60000 // 1分
-          },
+          // dragDrop: {
+          //   draggableX: true,
+          //   draggableY: true,
+          //   dragMinX: 60000 // 1分
+          // },
           point: {
-            events: {
-              drag: (e) =>  {
+            drage: {
+              update: (e) =>  {
+                console.log(e)
                 dispatch({
                   type: 'changed',
                   message: e,
@@ -114,16 +119,11 @@ const WeeklyGantt = ({tasks, plan, initialMin, initialMax, dispatch}) => {
 
   return (
     chartOptions && (
-      <>
-      <div className="weekly-gantt-container">
-        <HighchartsReact
-          highcharts={Highcharts}
-          constructorType={'ganttChart'}
-          options={chartOptions}
-          containerProps={{ id: 'container' }}
-        />
-      </div>
-      </>
+      <DndProvider backend={HTML5Backend}>
+        <div ref={drag} style={{ opacity: isDragging ? 0.5 : 1 }}>
+          <HighchartsReact highcharts={Highcharts} constructorType={'ganttChart'} options={chartOptions} ref={chartRef} />
+        </div>
+      </DndProvider>
       
     )
   );

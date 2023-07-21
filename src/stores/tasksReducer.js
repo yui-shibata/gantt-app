@@ -1,4 +1,4 @@
-import { schedule_item } from "./data/schedule_item";
+import { schedule_item } from "./data/schedule_item"
 
 export const initialState = splitScheduleByWeek();
 

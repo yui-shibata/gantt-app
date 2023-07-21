@@ -2,7 +2,6 @@ import { useEffect, useState, useReducer} from 'react';
 import WeeklyGantt from './WeeklyGantt';
 import {Button} from '@mui/material'
 import { initialState, tasksReducer} from '../../../stores/tasksReducer'
-import { useImmerReducer } from 'use-immer';
 
 
 

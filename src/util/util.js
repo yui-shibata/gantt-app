@@ -1,24 +1,20 @@
-import dayjs from "dayjs";
+import { count } from "d3"
 
-export function getMonth(month = dayjs().month()) {
-  const year = dayjs().year();
-  const firstDayOfTheMonth = dayjs(new Date(year, month, 1)).day();
-  let currentMonthCount = 0 - firstDayOfTheMonth;
-  const daysMatrix = new Array(5).fill([]).map(() => {
-    return new Array(7).fill(null).map(() => {
-      const date =  dayjs(new Date(year, month, currentMonthCount));
-      const hours = new Array(4).fill(null).map((_, hourIndex) => {
-        const hour = dayjs(new Date(year, month, currentMonthCount, hourIndex * 6));
-        return {
-          hour,
-        };
-      });
-      currentMonthCount++;
-      return {
-        date,
-        hours,
-      };
-    });
-  });
-  return daysMatrix;
+export const range = (keyCount) => [...Array(keyCount).keys()]
+
+export const areDatesSame = (first, second) => {
+  return (first.getFullYear() === second.getFullYear() && 
+  first.getMonth() === second.getMonth() &&
+  first.getDate() === second.getDate())
+}
+
+export const addDateBy = (date, count) => {
+  const d = new Date(date);
+  return new Date(d.setDate(d.getDate() + count))
+}
+
+export const getMonday = () => {
+  const today = new Date();
+  const first = today.getDate() - today.getDay() + 1;
+  return new Date(today.setDate(first))
 }

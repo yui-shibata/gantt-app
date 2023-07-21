@@ -8,9 +8,11 @@ import Root from './components/layout/root';
 import MonthlyGantt from './components/pages/MonthlyGantt/MonthlyGantt';
 import InventoryWindow from './components/pages/InventoryWindow/InventoryWindow';
 import ProcessStatus from './components/pages/ProcessStatus/ProcessStatus';
-import Calendar from './components/pages/Calendar/Calendar';
 import "./index.css";
 import ContextWrapper from './context/ContextWrapper';
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
+import MonthlyCalender from './components/pages/Calendar/MonthlyCalender';
 
 
 
@@ -28,7 +30,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/calendar",
-        element: <Calendar />,
+        element: <MonthlyCalender />,
       }
     ],
   },
@@ -40,8 +42,10 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ContextWrapper>
-      <RouterProvider router={router} />
-    </ContextWrapper>
+    <DndProvider backend={HTML5Backend}>
+      <ContextWrapper>
+        <RouterProvider router={router} />
+      </ContextWrapper>
+    </DndProvider>
   </React.StrictMode>
 )
