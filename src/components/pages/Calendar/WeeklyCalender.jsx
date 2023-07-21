@@ -1,142 +1,169 @@
 import styled from 'styled-components';
-import { range, addDateBy, areDatesSame, getMonday } from '../../../util/util';
+import { addDateBy, areDatesSame, getMonday } from '../../../util/util';
 import { useState } from 'react';
 import { CiSquareChevRight, CiSquareChevLeft } from "react-icons/ci";
-const DAYS = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
 
-const HOUR_WIDTH = 30;
-const HOUR_MARGIN_LEFT = 15;
+const DAYS = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
+const LINES = ["L1", "L2"];
+const HOUR_WIDTH = 60;
+const HOUR_PIX = HOUR_WIDTH / 6;
 
 export const WeeklyCalender = () => {
-  const [mondayDate, setMondayDate] = useState(getMonday())
+  const [mondayDate, setMondayDate] = useState(getMonday());
   const [events, setEvents] = useState([
-    {date:new Date(2023, 6, 21, 10), text:"first hi", howlong:3}
+    { date: new Date(2023, 6, 21, 8), text: "first hi", howlong: 6 }
   ]);
-  events.map(event => {
-    console.log(event.date.getMinutes())
-  })
-  const hourNow = new Date().getHours();
-  const minutesNow = new Date().getMinutes();
+
   const dayOfWeek  = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
-  const nextWeek = () => setMondayDate(addDateBy(mondayDate, 7))
-  const prevWeek = () => setMondayDate(addDateBy(mondayDate, -7))
+  const nextWeek = () => setMondayDate(addDateBy(mondayDate, 7));
+  const prevWeek = () => setMondayDate(addDateBy(mondayDate, -7));
+  const hours = Array.from({ length: 24 }, (_, i) => (i + 8) % 24);
 
   const onAddEvent = (date) => {
-    const text = prompt('text')
-    const from = prompt('from')
-    const to = prompt('to')
+    const text = prompt('text');
+    const from = prompt('from');
+    const to = prompt('to');
 
-    date.setHours(from)
+    date.setHours(from);
 
-    setEvents((prev) => [...prev, {text, date, howlong: (to - from)}])
-  }
+    setEvents((prev) => [...prev, { text, date, howlong: (to - from) }]);
+  };
 
   return (
     <>
       <FlexBox>
-        <p>today:{new Date().toDateString()}</p>
-        <p>from:{mondayDate?.toDateString()}</p>
-        <p>to:{addDateBy(mondayDate, 6).toDateString()}</p>
+        <p>today: {new Date().toDateString()}</p>
+        <p>from: {mondayDate?.toDateString()}</p>
+        <p>to: {addDateBy(mondayDate, 6).toDateString()}</p>
         <button onClick={prevWeek}><CiSquareChevLeft /></button>
         <button onClick={nextWeek}><CiSquareChevRight /></button>
       </FlexBox>
       <Wrapper>
         <HGrid first={"30px"} cols={1}>
-          <HGrid cols={7}>
-            {
-              DAYS.map((day, index) => (
-                <DayWrapper 
-                  index={index} 
-                  istoday={areDatesSame(new Date(), addDateBy(mondayDate, index))}
-                  onDoubleClick={() => onAddEvent(addDateBy(mondayDate, index))}
-                >
-                <p>{day}</p>
-                <VGrid cols={24}>
-                  {range(24).map((hour, index) => (
-                    <Hour key={index}>{((hour + 8) % 24).toString().padStart(2, '0')}</Hour>
-                  ))}
-                </VGrid>
-                {
-                  events.map((event => (
-                    areDatesSame(addDateBy(mondayDate, index), event.date) && (
-                      <Event
+          <VGrid rows={2}>
+            {LINES.map((line, rowIndex) => (
+              <p key={rowIndex}>{line}</p>
+            ))}
+          </VGrid>
+          <VGrid rows={2}>
+            <HGrid cols={7}>
+              {DAYS.map((day, index) => (
+                <div key={index}>
+                  <p>{day}</p>
+                  <HGrid cols={4}>
+                  {hours.map((hour, h_index) => {
+                    // indexが6の倍数の場合のみHourを表示
+                    if (h_index % 6 === 0) {
+                      return (
+                        <Hour key={h_index} width={HOUR_WIDTH}>
+                          {hour.toString().padStart(2, '0')}
+                        </Hour>
+                      );
+                    }
+                    return null; // それ以外の場合は何も描画しない
+                  })}
+                  </HGrid>
+                </div>
+              ))}
+            </HGrid>
+            <HGrid cols={7}>
+            {DAYS.map((day, index) => (
+              <DayWrapper
+                key={index}
+                onDoubleClick={() => onAddEvent(addDateBy(mondayDate, index))}
+              >
+                <HGrid cols={24}>
+                  {hours.map((hour, h_index) => (
+                    <HourLine key={h_index} left={hour * HOUR_PIX + index * (HOUR_WIDTH*4)} />
+                ))}
+                </HGrid>
+                {events.map((event, eventIndex) => (
+                  areDatesSame(addDateBy(mondayDate, index), event.date) && (
+                    <Event
+                      key={eventIndex}
                       howlong={event.howlong}
-                      fromleft={event.date.getHours() * HOUR_WIDTH + event.date.getMinutes() * (HOUR_WIDTH / 60 ) - HOUR_WIDTH * 8}>{event.text}
-                      </Event>
-                    )
-                  )))
-                }
-                </DayWrapper>
-              ))
-            }
-          </HGrid>
+                      fromleft={(event.date.getHours() - 8) * HOUR_PIX + event.date.getMinutes() * (HOUR_PIX / 60)}
+                    >
+                      {event.text}
+                    </Event>
+                  )
+                ))}
+              </DayWrapper>
+            ))}
+            </HGrid>
+          </VGrid>
         </HGrid>
-        <HourLine fromleft={(hourNow * HOUR_WIDTH + minutesNow * (hourNow/60)) + 24 * HOUR_WIDTH * dayOfWeek + (dayOfWeek-1) * 2 + 1 - HOUR_WIDTH * 8}/>
-      </Wrapper> 
+      </Wrapper>
     </>
-  )
-}
+  );
+};
 
 const Wrapper = styled.div`
-/* width:calc(100%-30px); */
-/* border:1px solid; */
-margin:15px;
-position:relative;
-`
+  /* width:calc(100%-30px); */
+  /* border:1px solid; */
+  margin: 15px;
+  position: relative;
+`;
+
 const HGrid = styled.div`
-display:grid;
-grid-template-columns: ${({first}) => first || "" } repeat(${({ cols }) => cols}, 1fr);
-`
+  position: inherit;
+  display: grid;
+  grid-template-columns: ${({ first }) => first || ""} repeat(${({ cols }) => cols}, 1fr);
+`;
 
 const VGrid = styled.div`
-display:grid;
-grid-template-columns: repeat(${({ cols }) => cols}, 1fr);
-  /* &:first-child{
-    margin-left:${HOUR_MARGIN_LEFT}px
-  } */
-`
+  /* position: relative; */
+  display: grid;
+  grid-template-rows: repeat(${({ rows }) => rows}, 1fr);
+`;
 
 const DayWrapper = styled.span`
-display:relative;
-border:1px solid red;
-background:${({istoday}) => istoday? 'red':''}
-`
+  display: relative;
+  border: 1px solid;
+`;
 
 const Hour = styled.span`
-width:${HOUR_WIDTH}px;
-display:flex;
-align-items:center;
-`
-
-const HourLine = styled.div`
-position:absolute;
-width:2px;
-height: 100%; /* 縦の高さを100%に指定することで、親要素の高さに合わせて縦に伸びる線となります */
-left: ${({ fromleft }) => fromleft}px; 
-border:2px solid orange;
-top: 0px;
-`
-
-const FlexBox = styled.div`
-display:flex;
-justify-content:space-around;
-font-size:1.2rem;
-margin-top:20px;
-button {
-  font-size:1.2rem;
+  width: ${({ width }) => width}px;
   display: flex;
   align-items: center;
-}
-`
+  border-left: 1px solid;
+  margin:0px
+  /* padding-left: 5px; */
+`;
+
+const FlexBox = styled.div`
+  display: flex;
+  justify-content: space-around;
+  font-size: 1.2rem;
+  margin-top: 20px;
+  button {
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+  }
+`;
 
 const Event = styled.div`
-  position:relative;
-  left:${({fromleft}) => fromleft}px;
-  background: green;
-  width: ${({howlong}) => howlong * HOUR_WIDTH}px;
+  position: relative;
+  left: ${({ fromleft }) => fromleft }px;
+  background: #FF9B9B;
+  width: ${({ howlong }) => (howlong * HOUR_PIX)}px;
   color: white;
-  margin: 0px 5px;
+  margin: 0px;
   padding: 5px;
-  border-radius:6px;
-`
+  border-radius: 4px;
+  height:100%;
+  opacity:0.8;
+  border:1px solid #F11A7B;
+`;
+
+const HourLine = styled.div`
+  position: absolute;
+  /* width: 1px; */
+  height: 100%;
+  left: ${({ left }) => left}px;
+  top: 0;
+  border: 1px solid;
+  margin:0px
+`;
