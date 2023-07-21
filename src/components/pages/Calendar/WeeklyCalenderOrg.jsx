@@ -4,20 +4,22 @@ import { useState } from 'react';
 import { CiSquareChevRight, CiSquareChevLeft } from "react-icons/ci";
 const DAYS = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
 
-const HOUR_WIDTH = 30;
-const HOUR_MARGIN_LEFT = 15;
+const HOUR_HEIGHT = 30;
+const HOUR_MARGIN_TOP = 15;
 
-export const WeeklyCalender = () => {
+export const WeeklyCalenderOrg = () => {
   const [mondayDate, setMondayDate] = useState(getMonday())
   const [events, setEvents] = useState([
     {date:new Date(2023, 6, 21, 10), text:"first hi", howlong:3}
+    // ,
+    // {date:new Date(2023, 6, 21, 20), text:"first hi", howlong:3},
+    // {date:new Date(2023, 6, 22, 11), text:"first hi", howlong:3}
   ]);
   events.map(event => {
     console.log(event.date.getMinutes())
   })
   const hourNow = new Date().getHours();
   const minutesNow = new Date().getMinutes();
-  const dayOfWeek  = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
   const nextWeek = () => setMondayDate(addDateBy(mondayDate, 7))
   const prevWeek = () => setMondayDate(addDateBy(mondayDate, -7))
@@ -43,6 +45,11 @@ export const WeeklyCalender = () => {
       </FlexBox>
       <Wrapper>
         <HGrid first={"30px"} cols={1}>
+          <VGrid rows={24}>
+            {
+              range(24).map((hour, index) => <Hour key={index}>{hour}</Hour>)
+            }
+          </VGrid>
           <HGrid cols={7}>
             {
               DAYS.map((day, index) => (
@@ -52,17 +59,12 @@ export const WeeklyCalender = () => {
                   onDoubleClick={() => onAddEvent(addDateBy(mondayDate, index))}
                 >
                 <p>{day}</p>
-                <VGrid cols={24}>
-                  {range(24).map((hour, index) => (
-                    <Hour key={index}>{((hour + 8) % 24).toString().padStart(2, '0')}</Hour>
-                  ))}
-                </VGrid>
                 {
                   events.map((event => (
                     areDatesSame(addDateBy(mondayDate, index), event.date) && (
                       <Event
                       howlong={event.howlong}
-                      fromleft={event.date.getHours() * HOUR_WIDTH + event.date.getMinutes() * (HOUR_WIDTH / 60 ) - HOUR_WIDTH * 8}>{event.text}
+                      fromtop={event.date.getHours() * HOUR_HEIGHT + event.date.getMinutes() * (HOUR_HEIGHT / 60)}>{event.text}
                       </Event>
                     )
                   )))
@@ -72,15 +74,15 @@ export const WeeklyCalender = () => {
             }
           </HGrid>
         </HGrid>
-        <HourLine fromleft={(hourNow * HOUR_WIDTH + minutesNow * (hourNow/60)) + 24 * HOUR_WIDTH * dayOfWeek + (dayOfWeek-1) * 2 + 1 - HOUR_WIDTH * 8}/>
+        <HourLine fromtop={hourNow * HOUR_HEIGHT + HOUR_MARGIN_TOP + HOUR_HEIGHT / 2 + minutesNow / 2}/>
       </Wrapper> 
     </>
   )
 }
 
 const Wrapper = styled.div`
-/* width:calc(100%-30px); */
-/* border:1px solid; */
+width:calc(100%-30px);
+border:1px solid;
 margin:15px;
 position:relative;
 `
@@ -91,10 +93,10 @@ grid-template-columns: ${({first}) => first || "" } repeat(${({ cols }) => cols}
 
 const VGrid = styled.div`
 display:grid;
-grid-template-columns: repeat(${({ cols }) => cols}, 1fr);
-  /* &:first-child{
-    margin-left:${HOUR_MARGIN_LEFT}px
-  } */
+grid-template-rows: repeat(${({ rows }) => rows}, 1fr);
+  &:first-child{
+    margin-top:${HOUR_MARGIN_TOP}px
+  }
 `
 
 const DayWrapper = styled.span`
@@ -104,18 +106,16 @@ background:${({istoday}) => istoday? 'red':''}
 `
 
 const Hour = styled.span`
-width:${HOUR_WIDTH}px;
+height:${HOUR_HEIGHT}px;
 display:flex;
-align-items:center;
+align-items:top;
 `
 
 const HourLine = styled.div`
 position:absolute;
-width:2px;
-height: 100%; /* 縦の高さを100%に指定することで、親要素の高さに合わせて縦に伸びる線となります */
-left: ${({ fromleft }) => fromleft}px; 
+width:100%;
+top: ${({fromtop}) => fromtop}px;
 border:2px solid orange;
-top: 0px;
 `
 
 const FlexBox = styled.div`
@@ -132,9 +132,9 @@ button {
 
 const Event = styled.div`
   position:relative;
-  left:${({fromleft}) => fromleft}px;
+  top:${({fromtop}) => fromtop}px;
   background: green;
-  width: ${({howlong}) => howlong * HOUR_WIDTH}px;
+  height: ${({howlong}) => howlong * HOUR_HEIGHT}px;
   color: white;
   margin: 0px 5px;
   padding: 5px;
