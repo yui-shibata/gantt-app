@@ -12,14 +12,12 @@ function Task({bar, index, stopDrag, mouseDownResize, mouseResize }) {
     }),
   }), [bar])
   return (
-    bar.list.cat === 'task' && (
       <div
-        key={index}
         ref={drag}
-        style={{ ...bar.style, opacity: isDragging ? 0.5 : 1, fontSize: 25, fontWeight: 'bold', cursor: 'move',}}
+        style={{ ...bar.style, opacity: isDragging ? 0.5 : 1, fontSize: 25, fontWeight: 'bold', cursor: 'move', zIndex:1}}
         className="rounded-lg absolute h-5 bg-yellow-100"
       >
-        {bar.list.cat === 'task' && (
+        {/* {bar.list.cat === 'task' && (
           <>
             <div className="w-full h-full" style={{ pointerEvents: 'none' }}></div>
             <div
@@ -49,9 +47,8 @@ function Task({bar, index, stopDrag, mouseDownResize, mouseResize }) {
               onMouseUp={(event) => stopDrag(event, index)}
             ></div>
           </>
-        )}
+        )} */}
       </div>
-      )
   )
 }
 

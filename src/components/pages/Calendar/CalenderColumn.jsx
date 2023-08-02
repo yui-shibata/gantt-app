@@ -1,8 +1,10 @@
 import React from 'react';
+import Task from './Task';
 
 function CalenderColumn({
   day,
-  calendarViewHeight
+  calendarViewHeight,
+  displayTask
 }) {
   return (
     <div
@@ -18,11 +20,11 @@ function CalenderColumn({
             ? '#FEE2E2'
             : 'transparent',
       }}>
-        <div 
-        style={{ left:'100px',  fontSize: 25, fontWeight: 'bold', cursor: 'move',}}
-        className='rounded-lg absolute h-5 bg-yellow-100'>
-          aaaaa
-        </div>
+        {
+          displayTask && (
+          <Task bar={displayTask} />
+          )
+        }
       </div>
   );
 }

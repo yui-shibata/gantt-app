@@ -98,7 +98,7 @@ const MonthlyCalender = () => {
     console.log('coord', coord);
     console.log('item', item);
     console.log('delta', delta);
-      let diff = pageX - coord.x;
+      let diff = delta.x;
       let days = Math.ceil(diff / 100);
       if (days !== 0) {
         setDisplayTasks((prev) => {
@@ -106,16 +106,17 @@ const MonthlyCalender = () => {
           return prev.map((task) => {
             if (task.list.id === item.list.id && task.list.cat === 'task') {
               const start_date = moment(task.list.start_date)
-                .add(-days, 'days')
+                .add(days, 'days')
                 .format('YYYY-MM-DD');
               const end_date = moment(task.list.end_date)
-                .add(-days, 'days')
+                .add(days, 'days')
                 .format('YYYY-MM-DD');
-              const left = Math.round(parseInt(item.style.left.replace('px', '')) + delta.x)
-              console.log('left', item.style.left)
-              const updatedList = { ...task.list, start_date, end_date };
-              const updateStyle = {...task.style, 'left':`${left}px`}
-              return { ...task, list: updatedList ,style: updateStyle};
+              const start = task.list.start + days;
+              // const left = Math.round(parseInt(item.style.left.replace('px', '')) + delta.x)
+              // console.log('left', item.style.left)
+              const updatedList = { ...task.list, start_date, end_date, start };
+              // const updateStyle = {...task.style, 'left':`${left}px`}
+              return { ...task, list: updatedList};
             } else {
               return task;
             }
@@ -243,14 +244,17 @@ const MonthlyCalender = () => {
           left = start * 100;
           style = {
             top: `${top + 40 * (list.category_id - 1)}px`,
-            left: `${left}px`,
+            // left: `${left}px`,
             width: `${100 * between}px`,
           };
         }
 
         return {
           style,
-          list,
+          list: {
+            ...list,
+            start,
+          },
         };
       })
     );
@@ -303,6 +307,7 @@ const MonthlyCalender = () => {
     }
   };
 
+  console.log(displayTasks)
   return (
     <>
       <div id='gantt-content' className='flex'>
@@ -396,7 +401,7 @@ const MonthlyCalender = () => {
                 </React.Fragment>
               ))}
             </div>
-            <div id='gantt-height' className='relative'>
+            <div id='gantt-height' className='relative' ref={drop}>
               {calendars.map((calendar, index) => (
                 <div key={index}>
                   {calendar.days.map((day, dayIndex) => (
@@ -404,13 +409,13 @@ const MonthlyCalender = () => {
                       key={dayIndex}
                       day={day}
                       calendarViewHeight={calendarViewHeight}
-                      mouseDownMove={mouseDownMove}
                       displayTasks={displayTasks}
                       calendarViewWidth={calendarViewWidth}
-                      mouseMove={mouseMove}
-                      stopDrag={stopDrag}
-                      mouseDownResize={mouseDownResize}
-                      mouseResize={mouseResize}
+                      // mouseMove={mouseMove}
+                      // stopDrag={stopDrag}
+                      // mouseDownResize={mouseDownResize}
+                      // mouseResize={mouseResize}
+                      displayTask={displayTasks.find(task => task.list.start === dayIndex)}
                     />
                   ))}
                 </div>
